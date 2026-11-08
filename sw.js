@@ -1,8 +1,8 @@
 // AnesTalk service worker — เปลี่ยนเลข VERSION ทุกครั้งที่แก้ไฟล์ เพื่อให้เครื่องผู้ใช้โหลดของใหม่
-const VERSION = "anestalk-v1";
+const VERSION = "anestalk-v2";
 const CORE = ["./", "./index.html", "./manifest.json",
-  "./icons/icon-32.png", "./icons/icon-96.png", "./icons/icon-180.png",
-  "./icons/icon-192.png", "./icons/icon-512.png", "./icons/icon-maskable-512.png"];
+  "./icon-32.png", "./icon-96.png", "./icon-180.png",
+  "./icon-192.png", "./icon-512.png", "./icon-maskable-512.png"];
 
 self.addEventListener("install", e => {
   e.waitUntil(caches.open(VERSION).then(c => c.addAll(CORE)).then(() => self.skipWaiting()));
