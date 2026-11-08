@@ -1,0 +1,347 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>AnesTalk</title>
+<meta name="description" content="ประโยคไทย–อังกฤษสำหรับวิสัญญีพยาบาล พร้อมเสียงอ่าน">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#16232a" media="(prefers-color-scheme: dark)">
+<link rel="icon" type="image/png" sizes="32x32" href="icons/icon-32.png">
+<link rel="apple-touch-icon" href="icons/icon-180.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="AnesTalk">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<style>
+*{-webkit-tap-highlight-color:transparent}
+:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+body{margin:0;-webkit-text-size-adjust:100%}
+img{max-width:100%}
+[hidden]{display:none!important}
+</style>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=IBM+Plex+Sans+Thai+Looped:wght@400;500;600&display=swap">
+<style>
+/* Layout: sticky header (search + syringe-label category strip) over a single column of phrase cards; tap a card for a large "show the patient" view. */
+:root{
+  --bg:#f3f6f7; --surface:#ffffff; --fg:#14232a; --muted:#5b6c73; --line:#d9e2e5;
+  --accent:#0b5563; --accent-ink:#ffffff; --accent-soft:#e1eef0; --star:#c98a00;
+  --en:"Atkinson Hyperlegible",system-ui,sans-serif;
+  --th:"IBM Plex Sans Thai Looped","Noto Sans Thai",Tahoma,sans-serif;
+  /* ISO 26825 syringe-label colours, used as category markers */
+  --c-greet:#7cb342; --c-id:#9aa7ad; --c-hx:#b48fd6; --c-npo:#e8907c; --c-ga:#f2d100;
+  --c-spinal:#8f9799; --c-block:#f08a00; --c-or:#e0434f; --c-pacu:#4fb3df;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0e1619; --surface:#16232a; --fg:#e6eef0; --muted:#98abb1; --line:#2a3a41;
+  --accent:#5cc2cf; --accent-ink:#06242a; --accent-soft:#18363c; --star:#f2c14e; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0e1619; --surface:#16232a; --fg:#e6eef0; --muted:#98abb1; --line:#2a3a41;
+  --accent:#5cc2cf; --accent-ink:#06242a; --accent-soft:#18363c; --star:#f2c14e; color-scheme:dark}
+
+body{background:var(--bg);color:var(--fg);font-family:var(--th);font-size:15px;line-height:1.55}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--surface)}
+.wrap{max-width:720px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+
+header{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--surface);border-bottom:1px solid var(--line)}
+header .wrap{padding-block:12px 0;display:flex;flex-direction:column;gap:10px}
+.brand{display:flex;align-items:baseline;justify-content:space-between;gap:12px}
+h1{margin:0;font-family:var(--en);font-size:22px;letter-spacing:-.01em;text-wrap:balance}
+h1{display:flex;align-items:center;gap:10px}
+.logo{width:40px;height:40px;border-radius:11px;background:#fff;border:1px solid var(--line);flex-shrink:0}
+h1 small{font-family:var(--th);font-weight:500;font-size:13px;color:var(--muted);margin-left:6px}
+.speed{display:flex;border:1px solid var(--line);border-radius:999px;overflow:hidden;flex-shrink:0}
+.speed button{border:0;background:none;color:var(--muted);font:600 12px var(--th);padding:6px 11px;cursor:pointer}
+.speed button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink)}
+.search{position:relative}
+.search input{width:100%;box-sizing:border-box;border:1px solid var(--line);background:var(--bg);color:var(--fg);border-radius:10px;padding:10px 12px 10px 36px;font:15px var(--th)}
+.search input:focus{outline:2px solid var(--accent);outline-offset:1px}
+.search svg{position:absolute;left:11px;top:50%;transform:translateY(-50%);color:var(--muted)}
+.cats{display:flex;gap:6px;overflow-x:auto;padding-bottom:10px;scrollbar-width:none;margin-inline:-4px;padding-inline:4px}
+.cats::-webkit-scrollbar{display:none}
+.chip{flex-shrink:0;display:flex;align-items:center;gap:7px;border:1px solid var(--line);background:var(--surface);color:var(--fg);border-radius:8px;padding:6px 10px 6px 6px;font:500 13px var(--th);cursor:pointer;white-space:nowrap}
+.chip i{width:6px;height:20px;border-radius:2px;background:var(--c)}
+.chip[aria-pressed="true"]{border-color:var(--accent);background:var(--accent-soft);color:var(--fg);font-weight:600}
+.chip:focus-visible,.card:focus-visible,.icon:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+main .wrap{padding-block:14px 40px;display:flex;flex-direction:column;gap:18px}
+.group h2{margin:0 0 8px;font:600 12px var(--th);letter-spacing:.06em;text-transform:uppercase;color:var(--muted);display:flex;align-items:center;gap:8px}
+.group h2 i{width:18px;height:6px;border-radius:2px;background:var(--c)}
+.list{display:flex;flex-direction:column;gap:8px}
+.card{display:grid;grid-template-columns:1fr auto;gap:4px 10px;background:var(--surface);border:1px solid var(--line);border-left:5px solid var(--c);border-radius:10px;padding:11px 10px 11px 13px;cursor:pointer;text-align:left;color:var(--fg);font:inherit;width:100%}
+.card .txt{min-width:0;display:flex;flex-direction:column;gap:3px}
+.en{font-family:var(--en);font-size:17px;line-height:1.35;font-weight:700}
+.th{font-size:14px;color:var(--muted)}
+.note{font-size:12px;color:var(--accent);font-weight:500}
+.acts{display:flex;flex-direction:column;gap:4px}
+.icon{width:38px;height:38px;border-radius:9px;border:1px solid var(--line);background:var(--bg);color:var(--accent);display:grid;place-items:center;cursor:pointer}
+.icon.star[aria-pressed="true"]{color:var(--star)}
+.icon.star[aria-pressed="true"] svg{fill:currentColor}
+.empty{color:var(--muted);text-align:center;padding:30px 0}
+
+/* Patient view */
+.show{position:fixed;inset:0;z-index:20;background:var(--surface);display:flex;flex-direction:column;
+  padding:calc(env(safe-area-inset-top,0px) + 16px) max(20px,env(safe-area-inset-right,0px)) calc(env(safe-area-inset-bottom,0px) + 16px) max(20px,env(safe-area-inset-left,0px))}
+.show .bar{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.show .tag{display:flex;align-items:center;gap:8px;font:600 13px var(--th);color:var(--muted)}
+.show .tag i{width:22px;height:8px;border-radius:2px;background:var(--c)}
+.show .body{flex:1;display:flex;flex-direction:column;justify-content:center;gap:18px;max-width:760px;margin:0 auto;width:100%;overflow-y:auto}
+.show .big{font-family:var(--en);font-weight:700;font-size:clamp(26px,7vw,44px);line-height:1.25;text-wrap:balance}
+.show .small{font-size:17px;color:var(--muted)}
+.show .foot{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+.btn{border:0;border-radius:12px;padding:13px 20px;font:600 16px var(--th);cursor:pointer;display:flex;align-items:center;gap:8px}
+.btn.primary{background:var(--accent);color:var(--accent-ink)}
+.btn.ghost{background:var(--bg);color:var(--fg);border:1px solid var(--line)}
+.scale{display:grid;grid-template-columns:repeat(11,1fr);gap:4px}
+.scale div{border-radius:6px;padding:10px 0 6px;text-align:center;font:700 18px var(--en);color:#14232a;font-variant-numeric:tabular-nums}
+.scale span{display:block;font:500 10px var(--th);margin-top:2px}
+.scale-lbl{display:flex;justify-content:space-between;font:600 13px var(--en);color:var(--muted)}
+.toast{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom,0px) + 20px);transform:translateX(-50%);background:var(--fg);color:var(--bg);padding:8px 14px;border-radius:8px;font-size:13px;z-index:30}
+@media (prefers-reduced-motion:no-preference){.show{animation:up .18s ease-out}@keyframes up{from{opacity:.4;transform:translateY(12px)}}}
+</style>
+</head>
+<body>
+<header>
+  <div class="wrap">
+    <div class="brand">
+      <h1><img class="logo" alt="" src="icons/icon-96.png"><span>AnesTalk <small>ไทย → English สำหรับวิสัญญี</small></span></h1>
+      <div class="speed" role="group" aria-label="ความเร็วเสียง">
+        <button id="sp-n" aria-pressed="true">ปกติ</button>
+        <button id="sp-s" aria-pressed="false">ช้า</button>
+      </div>
+    </div>
+    <label class="search">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+      <input id="q" type="search" placeholder="ค้นหา ไทย หรือ English เช่น แพ้ยา, pain" autocomplete="off">
+    </label>
+    <nav class="cats" id="cats" aria-label="หมวด"></nav>
+  </div>
+</header>
+<main><div class="wrap" id="out"></div></main>
+<div class="show" id="show" hidden></div>
+
+<script>
+const CATS=[
+ {id:"fav",th:"★ ที่บันทึกไว้",c:"var(--star)"},
+ {id:"greet",th:"ทักทาย",c:"var(--c-greet)"},
+ {id:"id",th:"ยืนยันตัวตน",c:"var(--c-id)"},
+ {id:"hx",th:"ซักประวัติ",c:"var(--c-hx)"},
+ {id:"npo",th:"งดน้ำงดอาหาร",c:"var(--c-npo)"},
+ {id:"ga",th:"ดมยาสลบ (GA)",c:"var(--c-ga)"},
+ {id:"spinal",th:"บล็อกหลัง Spinal / Epidural",c:"var(--c-spinal)"},
+ {id:"block",th:"บล็อกเส้นประสาท & Sedation",c:"var(--c-block)"},
+ {id:"or",th:"ในห้องผ่าตัด",c:"var(--c-or)"},
+ {id:"pacu",th:"ห้องพักฟื้น",c:"var(--c-pacu)"}
+];
+// [category, Thai, English, note?, flag?]
+const P=[
+["greet","สวัสดีค่ะ ดิฉันชื่อ ___ เป็นวิสัญญีพยาบาล","Hello, my name is ___. I'm a nurse anesthetist."],
+["greet","วันนี้ดิฉันจะดูแลเรื่องการให้ยาระงับความรู้สึกของคุณ","I'll be looking after your anesthesia today."],
+["greet","คุณพูดภาษาอังกฤษได้ไหมคะ","Do you speak English?"],
+["greet","ต้องการล่ามไหมคะ","Would you like an interpreter?"],
+["greet","ถ้าไม่เข้าใจ ถามได้ตลอดเลยนะคะ","If anything is unclear, please ask me at any time."],
+["greet","ช่วยพูดช้าๆ ได้ไหมคะ","Could you speak slowly, please?"],
+["greet","ช่วยพูดอีกครั้งได้ไหมคะ","Could you say that again, please?"],
+["greet","ตอนนี้รู้สึกอย่างไรบ้างคะ","How are you feeling right now?"],
+["greet","ไม่ต้องกังวลนะคะ เราจะอยู่ดูแลคุณตลอดเวลา","Please don't worry. We'll be with you the whole time."],
+["greet","มีคำถามอะไรอีกไหมคะ","Do you have any questions?"],
+
+["id","ขอทราบชื่อและนามสกุลค่ะ","Could you tell me your full name, please?"],
+["id","วันเกิดของคุณคือวันที่เท่าไหร่คะ","What is your date of birth?"],
+["id","ขอดูป้ายข้อมือหน่อยนะคะ","May I check your wristband?"],
+["id","อายุเท่าไหร่คะ","How old are you?"],
+["id","น้ำหนักและส่วนสูงเท่าไหร่คะ","What are your weight and height?"],
+["id","วันนี้คุณมาผ่าตัดอะไรคะ","What operation are you having today?"],
+["id","ผ่าตัดข้างไหนคะ ซ้ายหรือขวา","Which side is the operation on, left or right?"],
+["id","คุณเซ็นใบยินยอมแล้วใช่ไหมคะ","Have you signed the consent form?"],
+
+["hx","มีโรคประจำตัวไหมคะ เช่น ความดันสูง เบาหวาน โรคหัวใจ","Do you have any medical conditions, such as high blood pressure, diabetes or heart disease?"],
+["hx","เป็นโรคหอบหืดหรือโรคปอดไหมคะ","Do you have asthma or any lung disease?"],
+["hx","มีโรคไต โรคตับ หรือโรคไทรอยด์ไหมคะ","Do you have any kidney, liver or thyroid problems?"],
+["hx","มีอาการเจ็บหน้าอกหรือใจสั่นไหมคะ","Do you get chest pain or palpitations?"],
+["hx","เดินขึ้นบันได 2 ชั้นได้โดยไม่เหนื่อยไหมคะ","Can you climb two flights of stairs without getting short of breath?","ประเมิน functional capacity (≥4 METs)"],
+["hx","นอนกรนเสียงดัง หรือมีหยุดหายใจตอนหลับไหมคะ","Do you snore loudly, or has anyone noticed you stop breathing while asleep?","คัดกรอง OSA"],
+["hx","กินยาอะไรเป็นประจำบ้างคะ","What medicines do you take regularly?"],
+["hx","กินยาละลายลิ่มเลือดหรือยาต้านเกล็ดเลือดไหมคะ เช่น แอสไพริน วาร์ฟาริน","Do you take any blood thinners, such as aspirin, clopidogrel or warfarin?"],
+["hx","กินยาครั้งสุดท้ายเมื่อไหร่คะ","When did you last take this medicine?"],
+["hx","มีเลือดออกง่ายหรือเป็นจ้ำเลือดง่ายไหมคะ","Do you bleed or bruise easily?"],
+["hx","แพ้ยาหรือแพ้อาหารอะไรไหมคะ","Are you allergic to any medicines or foods?"],
+["hx","แพ้แล้วมีอาการอย่างไรคะ","What happens when you have the allergy?"],
+["hx","แพ้ยางลาเท็กซ์ (ถุงมือยาง) ไหมคะ","Are you allergic to latex, such as rubber gloves?"],
+["hx","เคยผ่าตัดหรือดมยาสลบมาก่อนไหมคะ","Have you had surgery or an anesthetic before?"],
+["hx","ครั้งก่อนมีปัญหาจากการดมยาไหมคะ เช่น คลื่นไส้อาเจียนมาก ตื่นช้า","Did you have any problems with the anesthetic last time, such as bad nausea or slow waking up?"],
+["hx","มีคนในครอบครัวเคยมีปัญหารุนแรงจากการดมยาสลบไหมคะ เช่น ไข้สูงมาก","Has anyone in your family had a serious reaction to anesthesia, such as a very high fever?","คัดกรอง Malignant hyperthermia"],
+["hx","สูบบุหรี่ไหมคะ วันละกี่มวน","Do you smoke? How many cigarettes a day?"],
+["hx","ดื่มแอลกอฮอล์ไหมคะ ดื่มบ่อยแค่ไหน","Do you drink alcohol? How often?"],
+["hx","ใช้ยาหรือสารเสพติดอะไรไหมคะ","Do you use any recreational drugs?"],
+["hx","ตอนนี้มีไข้ ไอ หรือเป็นหวัดไหมคะ","Do you have a fever, cough or cold at the moment?"],
+["hx","มีโอกาสตั้งครรภ์ไหมคะ ประจำเดือนมาครั้งล่าสุดเมื่อไหร่","Could you be pregnant? When was your last period?"],
+["hx","มีฟันปลอม ฟันโยก หรือครอบฟันไหมคะ","Do you have dentures, loose teeth or crowns?"],
+["hx","กรุณาถอดฟันปลอมออกก่อนเข้าห้องผ่าตัดนะคะ","Please remove your dentures before going into the operating room."],
+["hx","อ้าปากกว้างๆ และแลบลิ้นออกมาให้ดูหน่อยค่ะ","Please open your mouth wide and stick your tongue out.","Mallampati"],
+["hx","เงยหน้าขึ้นให้สุด แล้วก้มคางชิดอกค่ะ","Please tilt your head back as far as you can, then bring your chin down to your chest."],
+["hx","มีปัญหาที่คอหรือหลังไหมคะ","Do you have any neck or back problems?"],
+["hx","ใส่คอนแทคเลนส์ เครื่องประดับ หรือมีของมีค่าติดตัวไหมคะ","Are you wearing contact lenses, jewelry or anything valuable?"],
+
+["npo","กินอาหารครั้งสุดท้ายกี่โมงคะ","What time did you last eat anything?"],
+["npo","ดื่มน้ำครั้งสุดท้ายกี่โมงคะ","What time did you last have anything to drink?"],
+["npo","ห้ามกินอาหารอย่างน้อย 6–8 ชั่วโมงก่อนผ่าตัด","Please don't eat anything for at least 6 to 8 hours before surgery."],
+["npo","ดื่มน้ำเปล่าได้จนถึง 2 ชั่วโมงก่อนผ่าตัด","You may drink plain water until 2 hours before surgery."],
+["npo","งดน้ำและอาหารทุกชนิดหลังเที่ยงคืน","Nothing to eat or drink after midnight."],
+["npo","ห้ามเคี้ยวหมากฝรั่งหรืออมลูกอม","Please don't chew gum or suck on sweets."],
+["npo","เช้าวันผ่าตัดกินยาตัวนี้ได้ตามปกติ กับน้ำเพียงเล็กน้อย","On the morning of surgery, take this medicine as usual with a small sip of water."],
+["npo","เช้าวันผ่าตัดงดยาตัวนี้นะคะ","Please do not take this medicine on the morning of surgery."],
+["npo","การงดอาหารช่วยป้องกันการสำลักอาหารเข้าปอดระหว่างดมยา","Fasting stops food from going into your lungs while you are under anesthesia."],
+["npo","ถ้ากินอาหารไปแล้ว อาจต้องเลื่อนผ่าตัดเพื่อความปลอดภัย","If you have eaten, we may need to delay your surgery for your safety."],
+
+["ga","คุณจะได้รับการดมยาสลบ คือหลับลึกและไม่รู้สึกตัวตลอดการผ่าตัด","You will have a general anesthetic. You will be fully asleep and feel nothing during the operation."],
+["ga","เราจะให้ยานอนหลับทางสายน้ำเกลือ","We'll give you the anesthetic medicine through your drip."],
+["ga","ยาเข้าอาจรู้สึกแสบที่แขนเล็กน้อย","You may feel a slight sting in your arm as the medicine goes in."],
+["ga","หายใจออกซิเจนจากหน้ากากลึกๆ ช้าๆ นะคะ","Please take slow, deep breaths of oxygen through this mask."],
+["ga","จะเริ่มง่วงแล้วนะคะ หลับตาได้เลย","You'll start to feel sleepy now. You can close your eyes."],
+["ga","เมื่อหลับแล้ว เราจะใส่ท่อช่วยหายใจให้","Once you're asleep, we'll place a breathing tube to help you breathe."],
+["ga","วิสัญญีจะเฝ้าดูคุณตลอดการผ่าตัด","Your anesthesia team will stay with you and watch you throughout the operation."],
+["ga","ตื่นมาอาจเจ็บคอหรือเสียงแหบได้ 1–2 วัน","When you wake up, your throat may be sore or your voice hoarse for a day or two."],
+["ga","อาจคลื่นไส้อาเจียนได้ บอกเราได้เลย มียาช่วย","You may feel sick afterwards. Tell us and we can give you medicine for it."],
+["ga","ภาวะแทรกซ้อนร้ายแรงพบได้น้อยมาก","Serious complications are very rare."],
+["ga","ต้องมีผู้ใหญ่มารับกลับบ้าน และห้ามขับรถ 24 ชั่วโมง","An adult must take you home, and you must not drive for 24 hours.","ผ่าตัดแบบไปกลับ"],
+
+["spinal","เราจะฉีดยาชาเข้าที่หลังส่วนล่าง ทำให้ชาตั้งแต่เอวลงไป","We'll inject local anesthetic into your lower back. You will be numb from the waist down."],
+["spinal","คุณจะยังรู้สึกตัว แต่ไม่เจ็บ ถ้าอยากหลับ เราให้ยานอนหลับได้","You'll stay awake but feel no pain. If you'd like, we can give you something to make you sleepy."],
+["spinal","อาจรู้สึกว่ามีคนแตะหรือดึง แต่จะไม่เจ็บ","You may feel touching or pulling, but it should not hurt."],
+["spinal","นั่งห้อยขาข้างเตียง ก้มตัว หลังโค้งเหมือนกุ้งค่ะ","Please sit on the edge of the bed and curl your back forward like a shrimp."],
+["spinal","นอนตะแคง กอดเข่าชิดหน้าอกค่ะ","Please lie on your side and hug your knees to your chest."],
+["spinal","อยู่นิ่งๆ นะคะ","Please keep very still."],
+["spinal","จะฉีดยาชาที่ผิวหนังก่อน อาจแสบนิดหน่อย","First, a small injection to numb the skin. It may sting a little."],
+["spinal","ถ้ารู้สึกเหมือนไฟช็อตลงขา บอกทันทีนะคะ","Tell me straight away if you feel an electric shock down your leg."],
+["spinal","ขาจะรู้สึกอุ่น หนัก ชา และขยับไม่ได้ชั่วคราว","Your legs will feel warm, heavy and numb, and you won't be able to move them for a while."],
+["spinal","ยกขาขึ้นได้ไหมคะ","Can you lift your legs?"],
+["spinal","ตรงนี้รู้สึกเย็นไหมคะ เทียบกับตรงนี้เหมือนกันไหม","Does this feel cold? Does it feel the same here as here?","ทดสอบระดับการชา"],
+["spinal","ถ้ารู้สึกคลื่นไส้ หน้ามืด หรือหายใจไม่อิ่ม บอกทันที","Tell us straight away if you feel sick, dizzy or short of breath."],
+["spinal","อาการชาจะหมดภายในประมาณ 2–4 ชั่วโมง","The numbness will wear off in about 2 to 4 hours."],
+["spinal","บางคนปวดศีรษะหลังบล็อกหลัง ส่วนใหญ่หายเอง ถ้าปวดมากให้แจ้งพยาบาล","Some people get a headache afterwards. It usually settles; tell the nurse if it's severe."],
+["spinal","เราจะใส่สายเล็กๆ ไว้ที่หลัง (epidural) เพื่อให้ยาแก้ปวดหลังผ่าตัด","We'll place a thin tube in your back, called an epidural, to give pain relief after surgery."],
+
+["block","เราจะฉีดยาชารอบเส้นประสาท เพื่อให้แขนหรือขาข้างที่ผ่าตัดชา","We'll inject local anesthetic around the nerves to numb the arm or leg being operated on."],
+["block","เราใช้อัลตราซาวด์ดูตำแหน่งเข็ม","We use ultrasound to guide the needle."],
+["block","แขนจะชาและอ่อนแรงหลายชั่วโมง ระวังอย่าให้กระแทกหรือโดนความร้อน","Your arm will be numb and weak for several hours. Protect it from knocks and heat."],
+["block","ให้เริ่มกินยาแก้ปวดก่อนที่ยาชาจะหมด","Start taking your painkillers before the numbness wears off."],
+["block","ถ้าชารอบปาก หูอื้อ หรือมีรสโลหะในปาก บอกทันที","Tell me immediately if your lips feel numb, your ears ring, or you taste metal.","อาการเตือน LAST"],
+["block","จะให้ยาคลายกังวล คุณจะง่วงและผ่อนคลาย อาจจำเหตุการณ์ได้ไม่มาก","We'll give you sedation. You'll feel drowsy and relaxed, and you may not remember much."],
+["block","คุณยังหายใจเองได้ตามปกติ","You will still be breathing on your own."],
+["block","แพทย์ผ่าตัดจะฉีดยาชาเฉพาะที่บริเวณแผล","The surgeon will numb the area with a local anesthetic injection."],
+
+["or","เราจะย้ายคุณไปเตียงผ่าตัด ค่อยๆ เลื่อนตัวนะคะ","We're going to move you onto the operating table. Please slide over slowly."],
+["or","เตียงแคบ อย่าขยับตัวมากนะคะ","The table is narrow, so please try not to move around."],
+["or","จะติดเครื่องวัดความดัน คลื่นหัวใจ และออกซิเจน","I'm going to attach monitors for your blood pressure, heart and oxygen level."],
+["or","ที่วัดความดันจะบีบแขนเป็นระยะ","The blood pressure cuff will squeeze your arm from time to time."],
+["or","จะแทงเส้นให้น้ำเกลือ เจ็บนิดเดียวนะคะ","I'm going to put a drip in your vein. You'll feel a small sharp scratch."],
+["or","รู้สึกหนาวไหมคะ จะเอาผ้าห่มอุ่นให้","Are you cold? I'll get you a warm blanket."],
+["or","ตอนนี้สบายดีไหมคะ","Are you comfortable?"],
+["or","บีบมือดิฉันค่ะ","Squeeze my hand."],
+["or","ลืมตาค่ะ","Open your eyes."],
+["or","ใกล้เสร็จแล้วนะคะ","We're nearly finished."],
+["or","ผ่าตัดเสร็จแล้ว ทุกอย่างเรียบร้อยดีค่ะ","The operation is over. Everything went well."],
+
+["pacu","ตอนนี้คุณอยู่ในห้องพักฟื้น","You're in the recovery room now."],
+["pacu","หายใจเข้าลึกๆ ค่ะ","Take a deep breath, please."],
+["pacu","ปวดแผลไหมคะ ให้คะแนน 0 ถึง 10","Do you have any pain? On a scale of 0 to 10, where 0 is no pain and 10 is the worst pain imaginable, what number is it?","Pain score — เปิดเพื่อแสดงสเกล","scale"],
+["pacu","ปวดตรงไหนคะ","Where does it hurt?"],
+["pacu","กำลังให้ยาแก้ปวดทางสายน้ำเกลือนะคะ","I'm giving you pain relief through your drip."],
+["pacu","กดปุ่มนี้เมื่อปวด เครื่องจะจำกัดปริมาณยาให้ปลอดภัย","Press this button when you have pain. The machine limits the dose, so it's safe.","PCA"],
+["pacu","คลื่นไส้หรืออยากอาเจียนไหมคะ","Do you feel sick or want to vomit?"],
+["pacu","หนาวหรือหนาวสั่นไหมคะ","Do you feel cold or shivery?"],
+["pacu","ปวดปัสสาวะไหมคะ","Do you need to pass urine?"],
+["pacu","ยังไม่ให้ดื่มน้ำนะคะ","Please don't drink anything yet."],
+["pacu","จิบน้ำได้ทีละน้อยค่ะ","You can take small sips of water now."],
+["pacu","อีกสักครู่จะส่งกลับหอผู้ป่วย","You'll go back to the ward soon."],
+["pacu","ญาติรออยู่ข้างนอกค่ะ","Your family is waiting outside."]
+];
+
+const $=s=>document.querySelector(s);
+const catOf=id=>CATS.find(c=>c.id===id);
+let cat="greet", rate=0.9, favs=new Set();
+try{favs=new Set(JSON.parse(localStorage.getItem("anestalk-fav")||"[]"))}catch(e){}
+try{const c=localStorage.getItem("anestalk-cat");if(c&&catOf(c))cat=c}catch(e){}
+const key=p=>p[2];
+const saveFav=()=>{try{localStorage.setItem("anestalk-fav",JSON.stringify([...favs]))}catch(e){}};
+
+const ICON_SPK='<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H3v6h3l5 4z"/><path d="M15.5 8.5a5 5 0 0 1 0 7M19 5a10 10 0 0 1 0 14"/></svg>';
+const ICON_STAR='<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="m12 3 2.8 5.8 6.2.9-4.5 4.4 1 6.2L12 17.4 6.5 20.3l1-6.2L3 9.7l6.2-.9z"/></svg>';
+
+let voice=null;
+function pickVoice(){const v=speechSynthesis.getVoices();voice=v.find(x=>/en[-_]US/i.test(x.lang)&&/Samantha|Google|Aria|Jenny/i.test(x.name))||v.find(x=>/en[-_](US|GB)/i.test(x.lang))||v.find(x=>/^en/i.test(x.lang))||null}
+if("speechSynthesis"in window){pickVoice();speechSynthesis.onvoiceschanged=pickVoice}
+function speak(t){
+  if(!("speechSynthesis"in window)){toast("อุปกรณ์นี้ไม่รองรับการอ่านออกเสียง");return}
+  speechSynthesis.cancel();
+  const u=new SpeechSynthesisUtterance(t.replace(/_{2,}/g,"…"));
+  u.lang="en-US";u.rate=rate;if(voice)u.voice=voice;speechSynthesis.speak(u);
+}
+function toast(m){const t=document.createElement("div");t.className="toast";t.textContent=m;document.body.appendChild(t);setTimeout(()=>t.remove(),1800)}
+
+function renderCats(){
+  $("#cats").innerHTML=CATS.map(c=>`<button class="chip" style="--c:${c.c}" data-c="${c.id}" aria-pressed="${c.id===cat&&!$("#q").value}"><i></i>${c.th}${c.id==="fav"?` (${favs.size})`:""}</button>`).join("");
+}
+function card(p,i){
+  const c=catOf(p[0]),f=favs.has(key(p));
+  return `<div class="card" role="button" tabindex="0" style="--c:${c.c}" data-i="${i}">
+    <div class="txt"><div class="en" lang="en">${p[2]}</div><div class="th">${p[1]}</div>${p[3]?`<div class="note">${p[3]}</div>`:""}</div>
+    <div class="acts"><button class="icon spk" aria-label="ฟังเสียง" data-i="${i}">${ICON_SPK}</button>
+    <button class="icon star" aria-label="บันทึก" aria-pressed="${f}" data-i="${i}">${ICON_STAR}</button></div></div>`;
+}
+function render(){
+  renderCats();
+  const q=$("#q").value.trim().toLowerCase();
+  let items=P.map((p,i)=>[p,i]);
+  let html="";
+  if(q){
+    items=items.filter(([p])=>(p[1]+" "+p[2]+" "+(p[3]||"")).toLowerCase().includes(q));
+    const groups=CATS.filter(c=>c.id!=="fav").map(c=>[c,items.filter(([p])=>p[0]===c.id)]).filter(g=>g[1].length);
+    html=groups.map(([c,its])=>`<section class="group" style="--c:${c.c}"><h2><i></i>${c.th}</h2><div class="list">${its.map(([p,i])=>card(p,i)).join("")}</div></section>`).join("")
+      ||`<p class="empty">ไม่พบคำว่า “${q.replace(/[<>&"]/g,"")}”</p>`;
+  }else if(cat==="fav"){
+    items=items.filter(([p])=>favs.has(key(p)));
+    html=items.length?`<div class="list">${items.map(([p,i])=>card(p,i)).join("")}</div>`:`<p class="empty">กดดาว ☆ ที่ประโยคที่ใช้บ่อย เพื่อเก็บไว้ที่นี่</p>`;
+  }else{
+    html=`<div class="list">${items.filter(([p])=>p[0]===cat).map(([p,i])=>card(p,i)).join("")}</div>`;
+  }
+  $("#out").innerHTML=html;
+}
+function openShow(i){
+  const p=P[i],c=catOf(p[0]),s=$("#show");
+  s.style.setProperty("--c",c.c);
+  const scale=p[4]==="scale"?`<div class="scale-lbl"><span>No pain</span><span>Worst pain</span></div><div class="scale">${Array.from({length:11},(_,n)=>{const h=120-n*12;return `<div style="background:hsl(${h} 70% ${n>7?62:58}%)">${n}</div>`}).join("")}</div>`:"";
+  s.innerHTML=`<div class="bar"><span class="tag"><i></i>${c.th}</span><button class="btn ghost" id="close">ปิด</button></div>
+    <div class="body"><div class="big" lang="en">${p[2]}</div>${scale}<div class="small">${p[1]}</div></div>
+    <div class="foot"><button class="btn primary" id="say">${ICON_SPK} ฟังเสียง</button><button class="btn ghost" id="copy">คัดลอก</button></div>`;
+  s.hidden=false;
+  $("#close").onclick=()=>{s.hidden=true;speechSynthesis?.cancel()};
+  $("#say").onclick=()=>speak(p[2]);
+  $("#copy").onclick=()=>{navigator.clipboard?.writeText(p[2]).then(()=>toast("คัดลอกแล้ว"),()=>toast("คัดลอกไม่ได้ กดค้างที่ข้อความเพื่อเลือก"))};
+  $("#close").focus();
+}
+
+$("#cats").addEventListener("click",e=>{const b=e.target.closest(".chip");if(!b)return;cat=b.dataset.c;$("#q").value="";try{localStorage.setItem("anestalk-cat",cat)}catch(x){}render();window.scrollTo({top:0})});
+$("#q").addEventListener("input",render);
+$("#out").addEventListener("click",e=>{
+  const sp=e.target.closest(".spk"),st=e.target.closest(".star"),cd=e.target.closest(".card");
+  if(sp){e.stopPropagation();speak(P[sp.dataset.i][2]);return}
+  if(st){e.stopPropagation();const k=key(P[st.dataset.i]);favs.has(k)?favs.delete(k):favs.add(k);saveFav();st.setAttribute("aria-pressed",favs.has(k));renderCats();if(cat==="fav"&&!$("#q").value)render();return}
+  if(cd)openShow(+cd.dataset.i);
+});
+$("#out").addEventListener("keydown",e=>{if((e.key==="Enter"||e.key===" ")&&e.target.classList.contains("card")){e.preventDefault();openShow(+e.target.dataset.i)}});
+document.addEventListener("keydown",e=>{if(e.key==="Escape"&&!$("#show").hidden)$("#close").click()});
+const setRate=(r,on,off)=>{rate=r;$(on).setAttribute("aria-pressed","true");$(off).setAttribute("aria-pressed","false")};
+$("#sp-n").onclick=()=>setRate(0.9,"#sp-n","#sp-s");
+$("#sp-s").onclick=()=>setRate(0.6,"#sp-s","#sp-n");
+render();
+</script>
+
+<script>
+if("serviceWorker" in navigator){window.addEventListener("load",()=>navigator.serviceWorker.register("./sw.js").catch(()=>{}))}
+</script>
+</body>
+</html>
