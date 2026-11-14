@@ -1,5 +1,5 @@
 // AnesTalk service worker — เปลี่ยนเลข VERSION ทุกครั้งที่แก้ไฟล์ เพื่อให้เครื่องผู้ใช้โหลดของใหม่
-const VERSION = "anestalk-v2";
+const VERSION = "anestalk-v3";
 const CORE = ["./", "./index.html", "./manifest.json",
   "./icon-32.png", "./icon-96.png", "./icon-180.png",
   "./icon-192.png", "./icon-512.png", "./icon-maskable-512.png"];
